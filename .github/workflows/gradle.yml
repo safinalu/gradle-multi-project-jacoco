@@ -23,18 +23,17 @@ jobs:
       env:
         GITHUB_ACTOR: ${{ github.actor }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        JACOCO_REPORT_PATH: "build/reports/jacoco/jacocoRootReport/jacocoRootReport.xml"
     - name: Jacoco report existence check
       uses: andstor/file-existence-action@v1.1.0
       id: check_files
       with:
-        files: ${{ steps.gradle_build.JACOCO_REPORT_PATH }}
+        files: build/reports/jacoco/jacocoRootReport/jacocoRootReport.xml
     - name: Add Jacoco Report's results to Pull Request
       id: jacoco
       uses: madrapps/jacoco-report@v1.2
       if: github.event_name == 'pull_request' && steps.check_files.outputs.files_exists == 'true'
       with:
-        paths: ${{ steps.gradle_build.JACOCO_REPORT_PATH }}
+        paths: build/reports/jacoco/jacocoRootReport/jacocoRootReport.xml
         token: ${{ secrets.GITHUB_TOKEN }}
         min-coverage-overall: 80 #byte code instructions metric (not by lines!)
         #min-coverage-changed-files: 80
@@ -53,7 +52,7 @@ jobs:
       uses: PavanMudigonda/jacoco-reporter@v4.5
       if: steps.check_files.outputs.files_exists == 'true'
       with:
-        coverage_results_path: ${{ steps.gradle_build.JACOCO_REPORT_PATH }}
+        coverage_results_path: build/reports/jacoco/jacocoRootReport/jacocoRootReport.xml
         coverage_report_name: Coverage
         coverage_report_title: JaCoCo
         github_token: ${{ secrets.GITHUB_TOKEN }}
