@@ -1,0 +1,72 @@
+name: Java CI with Gradle
+
+on:
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps: 
+    - uses: actions/checkout@v3
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+    - name: Build with Gradle
+      uses: gradle/gradle-build-action@v2
+      with:
+        arguments: build
+      env:
+        GITHUB_ACTOR: ${{ github.actor }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  
+        JACOCO_REPORT_PATH: build/reports/jacoco/jacocoRootReport/jacocoRootReport.xml
+    - name: Jacoco report existence check
+      uses: andstor/file-existence-action@v1.1.0
+      id: check_files
+      with:
+        files: ${{ JACOCO_REPORT_PATH }}
+    - name: Add Jacoco Report's results to Pull Request
+      id: jacoco
+      uses: madrapps/jacoco-report@v1.2
+      if: github.event_name == 'pull_request' && steps.check_files.outputs.files_exists == 'true'
+      with:
+        paths: ${{ JACOCO_REPORT_PATH }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+        min-coverage-overall: 80 #byte code instructions metric (not by lines!)
+        #min-coverage-changed-files: 80
+        title: Jacoco coverage information by byte code instructions
+    - name: Add Jacoco Report to Pull Request if Jacoco report doesn't exist (no testing classes)
+      if: github.event_name == 'pull_request' && steps.check_files.outputs.files_exists == 'false'
+      uses: mshick/add-pr-comment@v1
+      with:
+        message: 
+          "### Jacoco coverage information by byte code instructions\n|Total Project Coverage|0%|❌|\n|:-|:-:|:-:|"
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        repo-token-user-login: 'github-actions[bot]' # The user.login for temporary GitHub tokens
+        allow-repeats: true #bot can repeat the same message in PR
+    - name: Prepare Jacoco Report's results for the workflow's summary
+      id: jacoco_reporter
+      uses: PavanMudigonda/jacoco-reporter@v4.5
+      if: steps.check_files.outputs.files_exists == 'true'
+      with:
+        coverage_results_path: ${{ JACOCO_REPORT_PATH }}
+        coverage_report_name: Coverage
+        coverage_report_title: JaCoCo
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        skip_check_run: false
+        minimum_coverage: 80 #byte code instructions metric (not by lines!)
+        fail_below_threshold: false #set true if action has to fail 
+        publish_only_summary: false
+    - name: Add Jacoco Report's results to the workflow's Summary (by lines)
+      if: steps.check_files.outputs.files_exists == 'true'
+      run: echo "${{ steps.jacoco_reporter.outputs.coverageSummary }}" >> $GITHUB_STEP_SUMMARY &&
+          echo "Coverage by code lines ${{ steps.jacoco_reporter.outputs.coveragePercentage }}" >> $GITHUB_STEP_SUMMARY
+    - name: Add Jacoco Report's results to the workflow's Summary (by byte code)
+      if: github.event_name == 'pull_request' && steps.check_files.outputs.files_exists == 'true'
+      run: echo "Total coverage (byte code instructions) ${{ steps.jacoco.outputs.coverage-overall }}" >> $GITHUB_STEP_SUMMARY
+    - name: Add Jacoco Report's results to the workflow's Summary if Jacoco report doesn't exist (no testing classes) 
+      if: steps.check_files.outputs.files_exists == 'false'
+      run: echo "There are no testing classes. Code coverage is 0%" >> $GITHUB_STEP_SUMMARY
