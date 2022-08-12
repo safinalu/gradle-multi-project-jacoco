@@ -22,7 +22,7 @@ jobs:
       env:
         GITHUB_ACTOR: ${{ github.actor }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  
-        JACOCO_REPORT_PATH: build/reports/jacoco/jacocoRootReport/jacocoRootReport.xml
+        JACOCO_REPORT_PATH: "build/reports/jacoco/jacocoRootReport/jacocoRootReport.xml"
     - name: Jacoco report existence check
       uses: andstor/file-existence-action@v1.1.0
       id: check_files
