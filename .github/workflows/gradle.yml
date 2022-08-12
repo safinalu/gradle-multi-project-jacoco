@@ -28,13 +28,13 @@ jobs:
       uses: andstor/file-existence-action@v1.1.0
       id: check_files
       with:
-        files: ${{ jobs.build.JACOCO_REPORT_PATH }}
+        files: ${{ build.JACOCO_REPORT_PATH }}
     - name: Add Jacoco Report's results to Pull Request
       id: jacoco
       uses: madrapps/jacoco-report@v1.2
       if: github.event_name == 'pull_request' && steps.check_files.outputs.files_exists == 'true'
       with:
-        paths: ${{ jobs.build.JACOCO_REPORT_PATH }}
+        paths: ${{ build.JACOCO_REPORT_PATH }}
         token: ${{ secrets.GITHUB_TOKEN }}
         min-coverage-overall: 80 #byte code instructions metric (not by lines!)
         #min-coverage-changed-files: 80
@@ -53,7 +53,7 @@ jobs:
       uses: PavanMudigonda/jacoco-reporter@v4.5
       if: steps.check_files.outputs.files_exists == 'true'
       with:
-        coverage_results_path: ${{ jobs.build.JACOCO_REPORT_PATH }}
+        coverage_results_path: ${{ build.JACOCO_REPORT_PATH }}
         coverage_report_name: Coverage
         coverage_report_title: JaCoCo
         github_token: ${{ secrets.GITHUB_TOKEN }}
