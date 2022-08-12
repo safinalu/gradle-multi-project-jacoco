@@ -1,4 +1,4 @@
-package com.safinalu.main;
+package com.safinalu.main1;
 
 public class Main {
 
