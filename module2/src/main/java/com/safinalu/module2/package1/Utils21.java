@@ -1,4 +1,4 @@
-package module2.package1;
+package com.safinalu.module2.package1;
 
 public class Utils21 {
 

@@ -1,6 +1,5 @@
 package com.safinalu.module2.package1;
 
-import module2.package1.Utils21;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
