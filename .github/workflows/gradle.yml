@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env: 
+      JACOCO_REPORT_PATH: "build/reports/jacoco/jacocoRootReport/jacocoRootReport.xml"
     steps: 
     - uses: actions/checkout@v3
     - name: Set up JDK 11
@@ -22,7 +24,6 @@ jobs:
       env:
         GITHUB_ACTOR: ${{ github.actor }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  
-        JACOCO_REPORT_PATH: "build/reports/jacoco/jacocoRootReport/jacocoRootReport.xml"
     - name: Jacoco report existence check
       uses: andstor/file-existence-action@v1.1.0
       id: check_files
